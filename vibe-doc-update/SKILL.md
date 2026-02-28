@@ -63,12 +63,46 @@ Prioritize:
 3. Any runbook, guide, or reference that now becomes outdated
 
 ### Step 4: Apply documentation updates
+Update necessity check - only update docs when staged changes involve:
+1. **Added**: New features, modules, APIs, commands, or behaviors exposed to users/developers.
+2. **Deleted**: Removed features, deprecated endpoints, dropped support.
+3. **Changed**: Modified behavior at the same abstraction level (e.g., function signature change, CLI flag rename, config format update).
+
+Skip updates when changes are:
+- Internal implementation details not visible at doc level
+- Refactoring that preserves external behavior
+- Private/internal code with no doc presence
+- Test-only changes
+- Formatting, comments, or whitespace
+
 Editing rules:
 1. Update only content implied by staged changes.
 2. Keep wording concrete and testable.
 3. Preserve existing style and structure.
 4. Do not invent unimplemented behavior.
 5. If staged changes do not affect docs, report "no doc impact" clearly.
+6. When docs contain mermaid diagrams, verify they reflect staged changes; update diagram structure/nodes/connections if affected.
+
+Mermaid diagram handling:
+1. Identify all mermaid code blocks (` ```mermaid `) in affected docs.
+2. Check if staged changes affect:
+   - Component/module names shown in diagrams
+   - Relationships, connections, or data flows
+   - Process steps or decision branches
+   - Configuration options or parameters displayed
+3. Update diagram content to match code changes.
+4. Verify mermaid syntax compiles correctly:
+   - Use proper diagram type (flowchart, sequenceDiagram, classDiagram, etc.)
+   - Ensure all node IDs are valid (alphanumeric, underscores, hyphens)
+   - Validate arrow syntax (`-->`, `->>`, `-.->`, etc.)
+   - Check subgraph declarations are properly closed
+   - Verify special characters in labels are quoted if needed
+5. Validate diagram with CLI tool before staging:
+   ```bash
+   mmdc -i doc.md -o /tmp/test.svg
+   ```
+   If `mmdc` is unavailable, use online mermaid editor or skip validation step.
+6. Test diagram renders without errors before staging.
 
 Minimum expectations:
 1. `CLAUDE.md`: update workflow, commands, guardrails, or agent behavior if affected.
@@ -136,3 +170,17 @@ Solution:
 1. Respect user-staged doc intent.
 2. Append focused updates instead of rewriting unrelated sections.
 3. Show final staged doc list for confirmation.
+
+### Error: mermaid diagram syntax error
+Cause: diagram code is malformed or incompatible with mermaid version.
+Solution:
+1. Validate diagram type (flowchart, sequenceDiagram, classDiagram, stateDiagram, erDiagram, etc.).
+2. Check node ID syntax - use only alphanumeric, underscores, hyphens.
+3. Verify arrow types match diagram type:
+   - flowchart: `-->`, `---`, `-.->`, `==>`
+   - sequenceDiagram: `->>`, `-->>`, `--x`, `--)`
+   - classDiagram: `-->`, `--*`, `--o`, `--|>`
+4. Ensure labels with special characters are quoted: `A["Label with (special) chars"]`.
+5. Verify subgraphs have matching `end` statements.
+6. Check indentation and line breaks are consistent.
+7. Use CLI tool to diagnose: `mmdc -i doc.md -o /tmp/test.svg` and review error output.
