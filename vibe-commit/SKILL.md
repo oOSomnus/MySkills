@@ -53,6 +53,8 @@ Message rules:
    - migration or breaking change
    - important side effects
 5. Do not mention unstaged or unrelated work.
+6. Never add any co-author trailer to the commit message.
+7. Explicitly forbid `Co-authored-by:` lines (including Claude/Codex/AI identities).
 
 Type guidance:
 - `feat`: user-visible functionality
@@ -77,6 +79,8 @@ git commit -m "type(scope): summary" -m "- bullet 1
 ```
 
 If the user asks for preview only, show message draft and do not commit.
+
+Before finalizing commit text, verify it contains no `Co-authored-by:` trailer.
 
 ### Step 5: Report result
 After committing, show:
